@@ -1,0 +1,84 @@
+name: '[Vue CLI] Build and Deploy to GitHub Pages'
+
+on:
+  workflow_call:
+    inputs:
+
+      branch:
+        description: 'Sets the target branch.'
+        default: 'gh-pages'
+        required: false
+        type: string
+
+      build_script_name:
+        description: 'Sets the name of the script defined the `package.json` file that using to build the project.'
+        default: 'build'
+        required: false
+        type: string
+
+      commit_message:
+        description: 'Customize the commit message.'
+        default: ''
+        required: false
+        type: string
+
+      node_version:
+        description: 'Sets the version of the Node.js to use.'
+        default: '16'
+        required: false
+        type: string
+
+      output_dir:
+        description: >
+          Sets the directory where the build files located in.
+          Folder paths cannot have a leading `/` or `./`.
+          Place a `.` to use the root directory.
+        default: 'dist'
+        required: false
+        type: string
+
+      package_manager:
+        description:  >
+          Sets the package manager of the project.
+          Available values: npm, pnpm
+        default: 'npm'
+        required: false
+        type: string
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-20.04
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        if: ${{ inputs.package_manager == 'pnpm' }}
+        uses: pnpm/action-setup@v2.2.1
+        with:
+          version: 6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+
+      - name: Install and Build (npm)
+        if: ${{ inputs.package_manager == 'npm' }}
+        run: |
+          npm install
+          npm run ${{ inputs.build_script_name }}
+      - name: Install and Build (pnpm)
+        if: ${{ inputs.package_manager == 'pnpm' }}
+        run: |
+          pnpm install
+          pnpm run ${{ inputs.build_script_name }}
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: ${{ inputs.branch }}
+          commit-message: ${{ inputs.commit_message || format('Deploying to {0} from {1}', inputs.branch, github.sha) }}
+          folder: ${{ inputs.output_dir }}
