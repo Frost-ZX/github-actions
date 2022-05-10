@@ -63,7 +63,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node_version }}
-          cache: ${{ inputs.package_manager }}
+          # cache: ${{ inputs.package_manager }}
 
       - name: Install and Build (npm)
         if: ${{ inputs.package_manager == 'npm' }}
