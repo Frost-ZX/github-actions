@@ -57,10 +57,10 @@ jobs:
         if: ${{ inputs.package_manager == 'pnpm' }}
         uses: pnpm/action-setup@v2.2.1
         with:
-          version: 6
+          version: 7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.node_version }}
           cache: ${{ inputs.package_manager }}
@@ -77,8 +77,9 @@ jobs:
           pnpm run ${{ inputs.build_script_name }}
 
       - name: Deploy to gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: ${{ inputs.branch }}
           commit-message: ${{ inputs.commit_message || format('Deploying to {0} from {1}', inputs.branch, github.sha) }}
           folder: ${{ inputs.output_dir }}
+          force: false
